@@ -2,13 +2,14 @@ import time
 import requests
 from django.core.management.base import BaseCommand
 from file_upload_app.models import UploadedFile
+from django.conf import settings
 
-TELEGRAM_TOKEN = "7800550715:AAFAkQ5IOP_6qOZfRXCet6twb8I5x-0zlrg"
-TELEGRAM_API_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/"
+TELEGRAM_API_URL = f"https://api.telegram.org/bot{settings.TELEGRAM_TOKEN}/"
 
 
 def get_updates(offset=None):
     """Функция для получения обновлений от Telegram."""
+
     url = TELEGRAM_API_URL + "getUpdates"
     params = {"timeout": 100, "offset": offset}
     response = requests.get(url, params=params)
@@ -17,6 +18,7 @@ def get_updates(offset=None):
 
 def send_message(chat_id, text):
     """Функция для отправки сообщения пользователю."""
+
     url = TELEGRAM_API_URL + "sendMessage"
     data = {"chat_id": chat_id, "text": text}
     requests.post(url, data=data)
@@ -24,6 +26,7 @@ def send_message(chat_id, text):
 
 def handle_update(update):
     """Функция для обработки каждого обновления."""
+
     message = update.get("message")
     if not message:
         return

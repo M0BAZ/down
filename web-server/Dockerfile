@@ -40,6 +40,6 @@ CMD ["gunicorn", "--bind", "0.0.0.0:3045", "--access-logfile", "-", "-w", "2", "
 
 FROM base AS worker
 COPY . .
-# todo fix it later
-CMD ["./worker_entrypoint.sh"]
+USER server
+CMD ["python", "manage.py", "start_bot"]
 

@@ -19,16 +19,16 @@ services:
           target: /app
     networks:
       - localnet
-  # worker:
-  #   container_name: agents-voximplant-worker
-  #   env_file: ".env"
-  #   build:
-  #     context: .
-  #     target: worker
-  #   environment:
-  #     DJANGO_SETTINGS_MODULE: "voximplant_medsenger_bot.settings.development"
-  #   depends_on:
-  #     - server
+  worker:
+    container_name: mirea-files-web-server-bot
+    env_file: ".env"
+    build:
+      context: .
+      target: worker
+    depends_on:
+      - server
+    networks:
+      - localnet
 
   db:
     container_name: mirea-files-db
