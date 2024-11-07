@@ -1,0 +1,60 @@
+services:
+  server:
+    container_name: mirea-files-web-server
+    env_file: ".env"
+    build:
+      context: .
+      target: dev
+    ports:
+      - 8001:8000
+    volumes:
+      - ./:/app
+    depends_on:
+      db:
+        condition: service_healthy
+    develop:
+      watch:
+        - action: sync
+          path: .
+          target: /app
+    networks:
+      - localnet
+  # worker:
+  #   container_name: agents-voximplant-worker
+  #   env_file: ".env"
+  #   build:
+  #     context: .
+  #     target: worker
+  #   environment:
+  #     DJANGO_SETTINGS_MODULE: "voximplant_medsenger_bot.settings.development"
+  #   depends_on:
+  #     - server
+
+  db:
+    container_name: mirea-files-db
+    image: postgres
+    restart: always
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=dummy
+      - POSTGRES_DB=mirea-files-db
+      - POSTGRES_PASSWORD=blablabla
+    ports:
+      - 5432:5432
+      - 8000:8000
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-U", "dummy", "-d", "mirea-files-db" ]
+      interval: 1s
+      timeout: 5s
+      retries: 5
+    networks:
+      - localnet
+    hostname: db
+
+volumes:
+  db-data:
+
+networks:
+  localnet:
+    driver: bridge

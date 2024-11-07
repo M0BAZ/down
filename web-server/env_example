@@ -1,0 +1,9 @@
+DEBUG=false
+
+DJANGO_SECRET_KEY="generate some secret"
+
+DATABASE_NAME="voximplant-medsenger-bot"
+DATABASE_USER="user"
+DATABASE_PASSWORD="super secure"
+DATABASE_HOST="localhost"
+DATABASE_PORT="1111"
