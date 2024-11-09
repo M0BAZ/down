@@ -6,6 +6,7 @@ class UploadedFile(models.Model):
     file_name = models.CharField(max_length=255)
     work_title = models.CharField(max_length=255)
     subj_name = models.CharField(max_length=255)
+    file_url = models.URLField(default='none')
 
     def __str__(self):
         return self.file_name

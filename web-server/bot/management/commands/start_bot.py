@@ -2,6 +2,7 @@ import time
 import requests
 from django.core.management.base import BaseCommand
 from django.conf import settings
+from file_upload_app.models import UploadedFile
 
 TELEGRAM_API_URL = f"https://api.telegram.org/bot{settings.TELEGRAM_TOKEN}/"
 
@@ -21,15 +22,14 @@ def send_message(chat_id, text):
     requests.post(url, data=data)
 
 
-def get_files_from_server():
-    """Функция для получения списка файлов с сервера."""
+def get_files_from_db():
+    """Функция для получения списка файлов из базы данных с использованием ORM."""
     try:
-        response = requests.get(f"{settings.SERVER_URL}/files/")
-        response.raise_for_status()  # Генерирует исключение, если статус код не 2xx
-        files = response.json()
-        return files
-    except requests.exceptions.RequestException as e:
-        print(f"Ошибка при получении файлов с сервера: {e}")
+        files = UploadedFile.objects.all()  # Получаем все записи из модели UploadedFile
+        file_list = [{"name": file.file_name, "url": file.file_url} for file in files]
+        return file_list
+    except Exception as e:
+        print(f"Ошибка при получении файлов из базы данных: {e}")
         return []
 
 
@@ -44,15 +44,15 @@ def handle_update(update):
 
     # Пример обработки команды "/start"
     if text == "/start":
-        send_message(chat_id, "Добро пожаловать в бота! Гойда")
+        send_message(chat_id, "Добро пожаловать в бота!")
     elif text == "/files":
-        # Получаем список файлов с сервера
-        files = get_files_from_server()
+        # Пример ответа списком файлов из базы данных
+        files = get_files_from_db()
         if files:
-            file_list = "\n".join([f"{file['name']} - {file['url']}" for file in files])
+            file_list = "\n".join([f"{file['name']} ({file['url']})" for file in files])
             send_message(chat_id, f"Список доступных файлов:\n{file_list}")
         else:
-            send_message(chat_id, "Не удалось получить список файлов с сервера.")
+            send_message(chat_id, "Нет доступных файлов.")
     else:
         send_message(chat_id, "Я не понимаю эту команду.")
 
