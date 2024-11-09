@@ -6,6 +6,27 @@ from django.contrib.auth.models import User
 from django.http import JsonResponse
 import json
 from django.contrib.auth import authenticate
+from file_upload_app.models import UserSession
+
+
+def create_user_session(username, telegram_id):
+    try:
+        # Найдем пользователя по его имени (или другим уникальным полям)
+        user = User.objects.get(username=username)
+
+        # Создадим или получим сессию для этого пользователя
+        user_session, created = UserSession.objects.get_or_create(user=user, telegram_id=telegram_id)
+
+        if created:
+            print(f"Session created for {user.username} with Telegram ID {telegram_id}")
+        else:
+            print(f"Session already exists for {user.username}")
+
+        return user_session
+    except User.DoesNotExist:
+        print(f"User with username '{username}' does not exist")
+        return None
+
 
 def get_file_list(request):
     files = UploadedFile.objects.all()
