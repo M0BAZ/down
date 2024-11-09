@@ -126,3 +126,7 @@ CORS_ALLOWED_ORIGINS = [
 TELEGRAM_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TELEGRAM_API_URL = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/"
 
+
+SERVER_URL = os.getenv('SERVER_URL')
+CORS_ALLOW_ALL_ORIGINS = True
+

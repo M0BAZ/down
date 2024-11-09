@@ -20,11 +20,15 @@ from django.conf import settings
 from django.contrib import admin
 from django.urls import path, include
 from django.http import HttpResponse
+from file_upload_app import views
 
 urlpatterns = [
     path('', lambda r: HttpResponse('lol')),
     path('admin/', admin.site.urls),
-    path('files/', include('file_upload_app.urls')),
+    # path('files/', include('file_upload_app.urls')),
+    path('files/', views.get_file_list, name='file_list'),
+    path('register/', views.register, name='register'),
+    path('check_credentials/', views.check_user_credentials, name='check_credentials'),
 ]
 
 

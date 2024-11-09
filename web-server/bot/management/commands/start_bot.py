@@ -1,7 +1,6 @@
 import time
 import requests
 from django.core.management.base import BaseCommand
-from file_upload_app.models import UploadedFile
 from django.conf import settings
 
 TELEGRAM_API_URL = f"https://api.telegram.org/bot{settings.TELEGRAM_TOKEN}/"
@@ -9,7 +8,6 @@ TELEGRAM_API_URL = f"https://api.telegram.org/bot{settings.TELEGRAM_TOKEN}/"
 
 def get_updates(offset=None):
     """Функция для получения обновлений от Telegram."""
-
     url = TELEGRAM_API_URL + "getUpdates"
     params = {"timeout": 100, "offset": offset}
     response = requests.get(url, params=params)
@@ -18,15 +16,25 @@ def get_updates(offset=None):
 
 def send_message(chat_id, text):
     """Функция для отправки сообщения пользователю."""
-
     url = TELEGRAM_API_URL + "sendMessage"
     data = {"chat_id": chat_id, "text": text}
     requests.post(url, data=data)
 
 
+def get_files_from_server():
+    """Функция для получения списка файлов с сервера."""
+    try:
+        response = requests.get(f"{settings.SERVER_URL}/files/")
+        response.raise_for_status()  # Генерирует исключение, если статус код не 2xx
+        files = response.json()
+        return files
+    except requests.exceptions.RequestException as e:
+        print(f"Ошибка при получении файлов с сервера: {e}")
+        return []
+
+
 def handle_update(update):
     """Функция для обработки каждого обновления."""
-
     message = update.get("message")
     if not message:
         return
@@ -36,15 +44,15 @@ def handle_update(update):
 
     # Пример обработки команды "/start"
     if text == "/start":
-        send_message(chat_id, "Добро пожаловать в бота!")
+        send_message(chat_id, "Добро пожаловать в бота! Гойда")
     elif text == "/files":
-        # Пример ответа списком файлов из базы данных
-        files = UploadedFile.objects.all()
-        if files.exists():
-            file_list = "\n".join([file.file_name for file in files])
+        # Получаем список файлов с сервера
+        files = get_files_from_server()
+        if files:
+            file_list = "\n".join([f"{file['name']} - {file['url']}" for file in files])
             send_message(chat_id, f"Список доступных файлов:\n{file_list}")
         else:
-            send_message(chat_id, "Нет доступных файлов.")
+            send_message(chat_id, "Не удалось получить список файлов с сервера.")
     else:
         send_message(chat_id, "Я не понимаю эту команду.")
 
@@ -66,4 +74,3 @@ class Command(BaseCommand):
             except Exception as e:
                 self.stderr.write(f"Ошибка: {e}")
                 time.sleep(5)  # Ожидание перед повторной попыткой при ошибке
-

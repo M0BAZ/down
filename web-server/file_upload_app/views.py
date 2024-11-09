@@ -1,9 +1,16 @@
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from .models import UploadedFile
 from django.views import View
 from django.utils.decorators import method_decorator
+from django.contrib.auth.models import User
+from django.http import JsonResponse
+import json
+from django.contrib.auth import authenticate
 
+def get_file_list(request):
+    files = UploadedFile.objects.all()
+    file_data = [{"name": file.file_name, "url": file.file.url} for file in files]
+    return JsonResponse(file_data, safe=False)
 
 @method_decorator(csrf_exempt, name='dispatch')
 class UploadFileView(View):
@@ -22,3 +29,38 @@ class UploadFileView(View):
             return JsonResponse({'status': 'success', 'file_id': uploaded_file.id})
         return JsonResponse({'status': 'failed'}, status=400)
 
+
+@csrf_exempt
+def register(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            login = data.get('login')
+            password = data.get('password')
+
+            if User.objects.filter(username=login).exists():
+                return JsonResponse({'success': False, 'message': 'Пользователь уже существует'})
+
+            # Создаем нового пользователя
+            user = User.objects.create_user(username=login, password=password)
+            return JsonResponse({'success': True, 'message': 'Пользователь успешно зарегистрирован'})
+
+        except Exception as e:
+            return JsonResponse({'success': False, 'message': f'Ошибка: {str(e)}'})
+    else:
+        return JsonResponse({'success': False, 'message': 'Метод не разрешен'})
+
+
+@csrf_exempt
+def check_user_credentials(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        login = data.get('login')
+        password = data.get('password')
+
+        user = authenticate(username=login, password=password)
+        if user is not None:
+            return JsonResponse({'success': True, 'message': 'Авторизация успешна'})
+        else:
+            return JsonResponse({'success': False, 'message': 'Неверные логин или пароль'})
+    return JsonResponse({'success': False, 'message': 'Метод не разрешен'})
