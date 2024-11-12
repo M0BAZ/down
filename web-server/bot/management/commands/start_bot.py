@@ -1,9 +1,11 @@
 import time
+
 import requests
-from django.core.management.base import BaseCommand
-from file_upload_app.models import UploadedFile
 from django.conf import settings
 from django.contrib.auth.models import User
+from django.core.management.base import BaseCommand
+
+from file_upload_app.models import UploadedFile
 from file_upload_app.models import UserSession
 
 TELEGRAM_API_URL = f"https://api.telegram.org/bot{settings.TELEGRAM_TOKEN}/"
